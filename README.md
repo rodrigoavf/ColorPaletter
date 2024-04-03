@@ -8,7 +8,7 @@ Upload an image or provide a URL, and it will:
 - Create a "repainted" image using the extracted color palette.
 
 ## Usage
-If you wish to simply test the app, access [Color Paletter on Streamlit](https://colorpalleter.streamlit.app/)
+If you wish to simply test the app, access [Color Paletter on Streamlit](https://colorpaletter.streamlit.app/)
 
 If you wish to clone and test it:
 
