@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import requests
 from io import BytesIO
 import pandas as pd
+import plotly.graph_objects as go
 
 def get_image_from_url(url):
     try:
@@ -55,23 +56,85 @@ def display_color_palette(colors):
     df = pd.DataFrame(pallet_table)
     st.dataframe(data=df, use_container_width=True, hide_index=True)
 
-def display_scatter_plot(image, labels, colors):
-    # Resize image for faster processing
-    img = resize_image(image)
-    # Convert image to numpy array
-    img_array = np.array(img)
-    # Reshape the array to make it suitable for plotting
-    img_array = img_array.reshape((-1, 3))
-    # Plot scatter plot
-    fig, ax = plt.subplots(figsize=(8, 6))
-    for i, color in enumerate(colors):
-        cluster_points = img_array[labels == i]
-        ax.scatter(cluster_points[:, 0], cluster_points[:, 1], c=[color / 255], label=f'Cluster {i+1}')
-    ax.set_title('K-Means Clustering')
-    ax.set_xlabel('R')
-    ax.set_ylabel('G')
-    ax.legend()
-    st.pyplot(fig)
+def display_scatter_plot(image, labels, colors, option):
+    if option == "3D Interactive Plot":
+        # Resize image for faster processing
+        img = resize_image(image)
+        # Convert image to numpy array
+        img_array = np.array(img)
+        # Reshape the array to make it suitable for plotting
+        img_array = img_array.reshape((-1, 3))
+        
+        # Create trace for each cluster
+        traces = []
+        for i, color in enumerate(colors):
+            cluster_points = img_array[labels == i]
+            trace = go.Scatter3d(
+                x=cluster_points[:, 0],
+                y=cluster_points[:, 1],
+                z=cluster_points[:, 2],
+                mode='markers',
+                marker=dict(
+                    color=f'rgb({color[0]}, {color[1]}, {color[2]})',
+                    size=5,
+                    opacity=0.8
+                ),
+                name=f'Cluster {i+1}'
+            )
+            traces.append(trace)
+
+        # Create layout for the plot
+        layout = go.Layout(
+            scene=dict(
+                xaxis=dict(title='R'),
+                yaxis=dict(title='G'),
+                zaxis=dict(title='B')
+            ),
+            margin=dict(l=0, r=0, b=0, t=0),
+            legend=dict(orientation="h")
+        )
+
+        # Create figure
+        fig = go.Figure(data=traces, layout=layout)
+        
+        # Display the plot
+        st.plotly_chart(fig)
+    if option == "2D Simple Plot":
+        # Resize image for faster processing
+        img = resize_image(image)
+        # Convert image to numpy array
+        img_array = np.array(img)
+        # Reshape the array to make it suitable for plotting
+        img_array = img_array.reshape((-1, 3))
+        # Plot scatter plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+        for i, color in enumerate(colors):
+            cluster_points = img_array[labels == i]
+            ax.scatter(cluster_points[:, 0], cluster_points[:, 1], c=[color / 255], label=f'Cluster {i+1}')
+        ax.set_title('K-Means Clustering')
+        ax.set_xlabel('R')
+        ax.set_ylabel('G')
+        ax.legend()
+        st.pyplot(fig)
+    if option == "3D Simple Plot":
+        # Resize image for faster processing
+        img = resize_image(image)
+        # Convert image to numpy array
+        img_array = np.array(img)
+        # Reshape the array to make it suitable for plotting
+        img_array = img_array.reshape((-1, 3))
+        # Plot scatter plot
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+        for i, color in enumerate(colors):
+            cluster_points = img_array[labels == i]
+            ax.scatter(cluster_points[:, 0], cluster_points[:, 1], cluster_points[:, 2], c=[color / 255], label=f'Cluster {i+1}')
+        ax.set_title('K-Means Clustering')
+        ax.set_xlabel('R')
+        ax.set_ylabel('G')
+        ax.set_zlabel('B')
+        ax.legend()
+        st.pyplot(fig)
 
 def repaint_image(image, labels, colors):
     # Resize image for faster processing
@@ -90,30 +153,36 @@ def repaint_image(image, labels, colors):
     return repainted_img
 
 def main():
-    st.title("Color Palette Generator")
+    st.set_page_config(page_title="Color Paletter",
+                       page_icon='🎨')
+    st.session_state.setdefault("uploaded_file", None)
 
-    st.sidebar.title("Settings")
-    k = st.sidebar.slider("Number of colors (k)", min_value=2, max_value=10, value=5)
+    st.title("Color Paletter")
+    st.write("A color palette generator")
+    st.write("## Settings")
 
-    upload_option = st.sidebar.radio("Upload image from", ("Upload", "URL"))
-    if upload_option == "Upload":
-        uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-    else:
-        url = st.sidebar.text_input("Enter Image URL")
-        if url:
-            image = get_image_from_url(url)
-            st.image(image, caption="Image from URL", use_column_width=True)
+    if st.session_state["uploaded_file"] == None:
+        k = st.slider("Number of colors (k)", min_value=2, max_value=10, value=5)
+        upload_option = st.radio("Upload image from", ("Upload", "URL"))
+        if upload_option == "Upload":
+            uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
+            if uploaded_file is not None:
+                image = Image.open(uploaded_file)
+                st.image(image, caption="Uploaded Image", use_column_width=True)
+        else:
+            url = st.text_input("Enter Image URL")
+            if url:
+                image = get_image_from_url(url)
+                st.image(image, caption="Image from URL", use_column_width=True)
 
-    if st.button("Generate Color Palette"):
+    if image is not None:
         try:
             colors, labels = get_colors_from_image(image, k)
             st.subheader(f"Top {k} Colors:")
             display_color_palette(colors)
             st.subheader("K-Means Clustering:")
-            display_scatter_plot(image, labels, colors)
+            option = st.selectbox(label="Plot type", options=["2D Simple Plot", "3D Simple Plot", "3D Interactive Plot"])
+            display_scatter_plot(image, labels, colors, option)
             st.subheader("Repainted Image:")
             repainted_image = repaint_image(image, labels, colors)
             st.image(repainted_image, caption="Repainted image using the color pallet", use_column_width=True)
