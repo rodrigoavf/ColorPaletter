@@ -1,5 +1,5 @@
 # Color Paletter
-A Color Palette Generator, this project is a Color Palette Generator built using Streamlit, a Python library for creating interactive web applications. Color Paletter utilizes K-Means clustering algorithm to extract dominant colors from an image and display them along with a scatter plot showing the distribution of colors in the image. Additionally, it repaints the image using the generated color palette.
+A Color Palette Generator built using Streamlit, a Python library for creating interactive web applications. Color Paletter utilizes K-Means clustering algorithm to extract dominant colors from an image and display them along with a scatter plot showing the distribution of colors in the image. Additionally, it repaints the image using the generated color palette.
 
 Upload an image or provide a URL, and it will:
 
