@@ -1,0 +1,7 @@
+numpy
+PIL
+sklearn.cluster
+matplotlib.pyplot
+requests
+io
+pandas
