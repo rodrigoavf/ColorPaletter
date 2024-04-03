@@ -1,7 +1,7 @@
+matplotlib
 numpy
-PIL
-sklearn.cluster
-matplotlib.pyplot
-requests
-io
 pandas
+Pillow
+Requests
+scikit_learn
+streamlit
