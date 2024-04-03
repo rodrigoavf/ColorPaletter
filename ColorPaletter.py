@@ -156,6 +156,7 @@ def main():
     st.set_page_config(page_title="Color Paletter",
                        page_icon='🎨')
     st.session_state.setdefault("uploaded_file", None)
+    st.session_state.setdefault("image", None)
 
     st.title("Color Paletter")
     st.write("A color palette generator")
@@ -168,14 +169,20 @@ def main():
             uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
             if uploaded_file is not None:
                 image = Image.open(uploaded_file)
+                st.session_state["image"] = image
                 st.image(image, caption="Uploaded Image", use_column_width=True)
+            else:
+                st.session_state["image"] = None
         else:
             url = st.text_input("Enter Image URL")
             if url:
                 image = get_image_from_url(url)
+                st.session_state["image"] = image
                 st.image(image, caption="Image from URL", use_column_width=True)
+            else:
+                st.session_state["image"] = None
 
-    if image is not None:
+    if st.session_state["image"] is not None:
         try:
             colors, labels = get_colors_from_image(image, k)
             st.subheader(f"Top {k} Colors:")
