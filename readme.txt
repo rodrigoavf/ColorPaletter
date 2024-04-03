@@ -1,10 +1,9 @@
-Color Palette Generator
+# Color Palette Generator
 This project is a Color Palette Generator built using Streamlit, a Python library for creating interactive web applications. The Color Palette Generator utilizes K-Means clustering algorithm to extract dominant colors from an image and display them along with a scatter plot showing the distribution of colors in the image. Additionally, it provides an option to repaint the image using the generated color palette.
 
-Usage
+## Usage
 Clone the repository:
 
-bash
 Copy code
 git clone https://github.com/your_username/Color-Palette-Generator.git
 Navigate to the project directory:
